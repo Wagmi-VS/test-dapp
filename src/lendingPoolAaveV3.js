@@ -134,43 +134,6 @@ export async function repayStable(asset_addr, amount, provider, account) {
 }
 
 
-
-/////// use getAssetReserveData() when refactoring...
-/**
- * Returns the computed apy of the lending pool for a given asset
- */
-export async function getApy(asset_addr, provider) {
-    try {
-        const pool = await getPoolContract(provider)
-        const [
-            configuration,
-            liquidityIndex,
-            currentLiquidityRate,
-            variableBorrowIndex,
-            currentVariableBorrowRate,
-            currentStableBorrowRate,
-            lastUpdateTimestamp,
-            id,
-            aTokenAddress,
-            stableDebtTokenAddress,
-            variableDebtTokenAddress,
-            interestRateStrategyAddress,
-            accruedToTreasury,
-            unbacked,
-            isolationModeTotalDebt,
-
-        ] = await pool.getReserveData(asset_addr)
-
-        const supplyRate = currentLiquidityRate.toBigInt()
-        const supplyRateNumber = Number(supplyRate)
-        const depositAPR = supplyRateNumber / RAY
-        const depositAPY = ((1 + (depositAPR / SECONDS_PER_YEAR)) ** SECONDS_PER_YEAR) - 1
-        return (depositAPY * 100);
-    } catch (error) {
-        console.error(error);
-    }
-}
-
 export async function getAssetReserveData(asset_addr, provider) {
     try {
         const pool = await getPoolContract(provider)
@@ -260,9 +223,12 @@ export async function withdrawFromAave(assetAddr, amount, addrTo, provider) {
 export async function depositETHtoAave(onBehalfOf, referralCode = 0, provider, amount) {
     try {
         const pool = await getPoolContract(provider);
-        const contract = SumerObserver.Contract(networks.networks.goerli.wethGateway, IWETHGateway.abi, provider.getSigner(),provider.apikey,provider.chainId)
+
+        // const contract = new ethers.Contract(networks.networks.goerli.wethGateway, IWETHGateway.abi, provider.getSigner())
+        const contract = SumerObserver.Contract(networks.networks.goerli.wethGateway, IWETHGateway.abi, provider.getSigner(), provider.apikey, provider.chainId)
+
         const tx = await contract.depositETH(pool.address, onBehalfOf, referralCode, { value: amount })
-        return await tx.wait()
+        await tx.wait()
     } catch (error) {
         console.error(error)
     }
@@ -274,14 +240,16 @@ export async function depositETHtoAave(onBehalfOf, referralCode = 0, provider, a
 export async function withdrawETHfromAave(onBehalfOf, provider, amount) {
     try {
         const pool = await getPoolContract(provider);
-        const contract = new ethers.Contract(networks.networks.goerli.wethGateway, IWETHGateway.abi, provider.getSigner())
+
+        // const contract = new ethers.Contract(networks.networks.goerli.wethGateway, IWETHGateway.abi, provider.getSigner())
+        const contract = SumerObserver.Contract(networks.networks.goerli.wethGateway, IWETHGateway.abi, provider.getSigner(), provider.apikey, provider.chainId)
+
         const aweth = await getERC20ContractWrite(networks.networks.goerli.aWETH, provider)
         const tx_approve = await aweth.approve(contract.address, amount)
         await tx_approve.wait()
-        console.log("approve tx", tx_approve)
+
         const tx = await contract.withdrawETH(pool.address, amount, onBehalfOf)
-        console.log(tx)
-        return await tx.wait()
+        await tx.wait()
     } catch (error) {
         console.error(error)
     }

@@ -16,15 +16,14 @@ import Container from '@mui/material/Container';
 import * as React from 'react';
 import { useWeb3React } from '@web3-react/core'
 import { useState } from 'react';
-import {depositETHtoAave, withdrawETHfromAave} from './lendingPoolAaveV3';
+import { depositETHtoAave, withdrawETHfromAave } from './lendingPoolAaveV3';
 import { userBalances } from './balances';
-import { ethers, Signer } from 'ethers';
+import { ethers } from 'ethers';
 import ConnectMetamask from './components/connectMetamask'
 import TitleDescription from './components/titleDescription'
 import networks from './brownie-config.json'
-import {sx_header,sx_card} from './stile'
+import { sx_header, sx_card } from './stile'
 
-import { SumerObserver } from "sumer-sdk";
 
 function App() {
   const { active, chainId, account, library: provider } = useWeb3React();
@@ -89,31 +88,8 @@ function App() {
     })
   }
 
-  const failTx = async () => {
-    if (active) {
-
-      const abi = [
-        {
-          "inputs": [],
-          "name": "thisFails",
-          "outputs": [],
-          "stateMutability": "nonpayable",
-          "type": "function"
-        }
-      ]
-      const signer = provider.getSigner()
-      const contractAddres = '0xC51FceEc013cD34aE2e95E6D64E9858F2aC28fFf'
-      console.log("prov",provider.apikey)
-      const USDTContract = SumerObserver.Contract(contractAddres, abi, signer, provider.apikey, chainId)
-      await USDTContract.thisFails({ gasLimit: 21711 });
-
-    } else alert("connect wallet")
-  }
-
-
-
   return (
-<React.Fragment>
+    <React.Fragment>
       <GlobalStyles styles={{ ul: { margin: 0, padding: 0, listStyle: 'none' } }} />
       <CssBaseline />
       <AppBar position="static" elevation={0}
@@ -131,7 +107,7 @@ function App() {
       <Container maxWidth="md" component="main">
         <Grid container spacing={1} alignItems="flex-end">
           {/* */}
-          <Grid item xs={2} sm={4} md={6}>
+          <Grid item md={12}>
             <Card>
               <CardHeader title={"ETH"} titleTypographyProps={{ align: 'center' }}
                 subheaderTypographyProps={{ align: 'center' }} sx={sx_header} />
@@ -169,28 +145,7 @@ function App() {
               </CardActions>
             </Card>
           </Grid>
-          <Grid item xs={2} sm={4} md={4}>
-            <Card>
-              <CardHeader title={"....."} titleTypographyProps={{ align: 'center' }}
-                subheaderTypographyProps={{ align: 'center' }} sx={sx_header} />
-              <CardContent>
-                <Box sx={sx_card}>
-                  <Typography component="h1" variant="body1">
 
-                  </Typography>
-                </Box>
-              </CardContent>
-              <CardActions>
-                <ul>
-                  <Button onClick={() => { failTx() }}
-                    fullWidth variant="outlined">
-                    fail transaction{' '}
-                  </Button>
-                </ul>
-
-              </CardActions>
-            </Card>
-          </Grid>
         </Grid>
       </Container>
 
